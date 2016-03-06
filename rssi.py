@@ -4,6 +4,7 @@ import serial
 
 
 class Rssi(object):
+    commits = 0
     def __init__(self, device_id):
         self.device_id = device_id
         # We want to know that a connection happened
@@ -15,15 +16,16 @@ class Rssi(object):
                 '''INSERT INTO connections VALUES(?, ?, ?);''' 
                 ,args)
         self.db_connection.execute(
-                'create table if not exists recording (device_id text, date text, rssi integer)')
+                'create table if not exists recording (device_id text, date text, channel integer, rssi integer)')
     def __enter__(self):
         return self 
-    def record_rssi(self,rssi_value):
-        args = (self.device_id, datetime.datetime.now(), rssi_value,)
+    def record_rssi(self,channel,rssi_value):
+        args = (self.device_id, datetime.datetime.now(),channel, rssi_value,)
         self.db_connection.execute(
-                '''INSERT INTO recording VALUES (?, ?, ?);'''
+                '''INSERT INTO recording VALUES (?, ?, ?, ?);'''
                 ,args)
         self.db_connection.commit()
+        Rssi.commits+=1
     def __exit__(self, exc_type, exc_value, traceback):
         args = (datetime.datetime.now(), self.device_id, False,)
         self.db_connection.execute(
@@ -33,19 +35,27 @@ class Rssi(object):
 
         self.db_connection.close()
 
+import read_rssi
 import threading 
 class Serial_Reader(threading.Thread):
-    def __init__(self, serial_instance):
+    def __init__(self, serial_instance, parse_data):
+        '''parse_data should parse the data read by the serial_instance
+        and return (channel_num, rssi)'''
         self._stopevent = threading.Event() 
-        self.name = serial_instance.port_name
-        Thread.__init__(self, name=self.name)
+        self.parse_data = parse_data
+        threading.Thread.__init__(self, name=serial_instance.name)
         self.serial_instance = serial_instance
         
     def run(self):
         with Rssi(self.name) as device_record:
-            while self._stopevent.isSet():
+            read_rssi.start_reading(self.serial_instance)
+            print("Collecting data")
+            while not self._stopevent.isSet():
                 raw_data =self.serial_instance.readline()
-                device_record.record_rssi(int(raw_data))
+                reported = self.parse_data(raw_data)
+                if reported is None:
+                    continue
+                device_record.record_rssi(*reported)
         print("Instance {} closing".format(self.name))
 
     def join(self, timeout=None):
