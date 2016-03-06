@@ -4,8 +4,21 @@ import serial
 
 
 class Rssi(object):
+    '''
+    Repository for Rssi information.
+    
+    Information is stored in 'signals.db' - a sqlite database.
+    
+    Rssi.commits represents the number of records written
+        during this connection.  
+        It is NOT the total number of records. 
+
+    '''
     commits = 0
     def __init__(self, device_id):
+        '''
+        device_id : str - Identifies the device in the database
+        '''
         self.device_id = device_id
         # We want to know that a connection happened
         self.db_connection = sqlite3.connect('signals.db')
@@ -20,6 +33,10 @@ class Rssi(object):
     def __enter__(self):
         return self 
     def record_rssi(self,channel,rssi_value):
+        '''
+        channel : int - The channel that the rssi value was recorded on
+        rssi_value : int 
+        '''
         args = (self.device_id, datetime.datetime.now(),channel, rssi_value,)
         self.db_connection.execute(
                 '''INSERT INTO recording VALUES (?, ?, ?, ?);'''
@@ -27,6 +44,9 @@ class Rssi(object):
         self.db_connection.commit()
         Rssi.commits+=1
     def __exit__(self, exc_type, exc_value, traceback):
+        '''
+        Closes the database connection after recording an end-connection entry.
+        '''
         args = (datetime.datetime.now(), self.device_id, False,)
         self.db_connection.execute(
                 '''INSERT INTO connections VALUES(?, ?, ?);'''

@@ -24,15 +24,16 @@ while raw_input("Enter s to start recording data\n") != "s":
 
 reader1.start()
 
-time.sleep(5)
-while True:
-    end = raw_input(
-'''Enter q to stop\n
-Enter c for the current total\n''')
-    if end == "c":
-        print(rssi.Rssi.commits)
-    if end == "q":
-        print("Quitting after {} recordings".format(rssi.Rssi.commits))
-        break
+time.sleep(60*5)
+# while True:
+#     end = raw_input(
+# '''Enter q to stop\n
+# Enter c for the current total\n''')
+#     if end == "c":
+#         print(rssi.Rssi.commits)
+#     if end == "q":
+#         print("Quitting after {} recordings".format(rssi.Rssi.commits))
+#         break
 
+print ("{} recordings made".format(rssi.Rssi.commits))
 reader1.join()

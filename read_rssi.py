@@ -2,9 +2,12 @@ import serial
 import time
 
 def start_reading(serial_connection):
-    '''Starts reading RSSI values'''
+    '''Performs setup protocol for reading RSSI data.
+    Returns early without an exception if 
+        the device was already transmitting.
+    '''
     ser = serial_connection
-    print("Starting first poll")
+    print("Checking whether device is active.")
     while True:
         x = ser.readline()
         repr(x)
@@ -17,18 +20,16 @@ def start_reading(serial_connection):
             ser.write(b'M00')
             break
 
-    print("Starting second poll!")
-    count = 0
+    print("Setting OP MODE... ")
     while True:
         x = ser.readline()
         print(x)
-        count+=1
         ser.write(b'M00')
         if "OPMOD" in x: 
             ser.write(b'100')
             break
 
-    print("Starting third poll!")
+    print("Setting transmission rate... ")
     while True:
         x = ser.readline()
         print(x)
@@ -37,6 +38,7 @@ def start_reading(serial_connection):
             ser.write(b'C11')
             break
 
+    print("Setting Channel")
     count =0
     x = ser.readline()
     while "Channel" not in x: 
