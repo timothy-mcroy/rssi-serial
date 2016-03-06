@@ -8,3 +8,14 @@ Kernel version:4.1
 
 ## Usage
 With the devpack plugged in and attached to a USB cable, plug the other end of the cable into the Raspberry Pi
+
+Run 
+```bash
+python sample.py
+```
+Enter `s` to start recording.  
+
+`q` will stop recording
+
+`c` will display the current number of recordings. 
+
