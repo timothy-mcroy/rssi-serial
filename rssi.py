@@ -58,29 +58,63 @@ class Rssi(object):
 import read_rssi
 import threading 
 class Serial_Reader(threading.Thread):
-    def __init__(self, serial_instance, parse_data):
-        '''parse_data should parse the data read by the serial_instance
-        and return (channel_num, rssi)'''
+    """
+    Usage
+    ```
+        import serial
+        import time
+        serial_instance = serial.Serial('/dev/ttyACM0', 115200, timeout=2)
+        def parse_data(data):
+            return data_as_parsed_tuple(data)
+        reader = Serial_Reader(serial_instance, parse_data)
+        reader.start()
+        # Record for 5 seconds
+        time.sleep(5)  
+        # End recording and close the thread.
+        reader.join()
+    ```
+    """
+    def __init__(self, serial_instance, parse_data, address = None):
+        '''
+        parse_data should parse the data read by the serial_instance
+        and return (channel_num, rssi)
+        '''
         self._stopevent = threading.Event() 
         self.parse_data = parse_data
-        threading.Thread.__init__(self, name=serial_instance.name)
+        if address is None:
+            threading.Thread.__init__(self, name=serial_instance.name)
+        else:
+            threading.Thread.__init__(self, name=str(address))
         self.serial_instance = serial_instance
+        self.times_data_failed_to_match= 0
         
     def run(self):
+        '''
+        This method should not be directly called.
+        '''
+        # Using `with` is important to ensure automatic disposal of resources
+        #  This is also how Rssi knows that it is finished recording.
         with Rssi(self.name) as device_record:
+            # Initialize the protocol to begin transmitting data
             read_rssi.start_reading(self.serial_instance)
-            print("Collecting data")
+            print("Collecting data on {}".format(self.name))
+            # Collect rssi information until self.join() is called.
             while not self._stopevent.isSet():
+                # Get data from serial connection
                 raw_data =self.serial_instance.readline()
+                # Parse data into tuple to be recorded
                 reported = self.parse_data(raw_data)
                 if reported is None:
+                    self.times_data_failed_to_match +=1
                     continue
+                #expand the tuple into the arguments for record_rssi
                 device_record.record_rssi(*reported)
         print("Instance {} closing".format(self.name))
 
     def join(self, timeout=None):
         if timeout == None:
             self.serial_instance.timeout
+        # _stopevent is the loop invariant.
         self._stopevent.set()
         threading.Thread.join(self, timeout)
 

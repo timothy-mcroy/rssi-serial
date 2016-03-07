@@ -2,10 +2,14 @@ import rssi
 import serial
 import re
 import time
-device1 = serial.Serial('/dev/ttyACM0', 115200, timeout=2)
+serial_connections = [
+        serial.Serial('/dev/ttyACM0', 115200, timeout=2)
+        ]
+addresses = [None]
 
 def reading_matcher(reading):
-    '''Intended to match a pattern such as
+    '''
+    Intended to match a pattern such as
     "Channel: 11 ; RSSI is: -117"
 
     return (int, int)
@@ -17,13 +21,14 @@ def reading_matcher(reading):
     result = tuple(map(int,match.groups()))
     return result
 
-reader1 = rssi.Serial_Reader(device1, reading_matcher)
+readers = [rssi.Serial_Reader(connection, reading_matcher, address) 
+            for connection, address in zip(serial_connections, addresses]    
 
 while raw_input("Enter s to start recording data\n") != "s":
     continue
 
-reader1.start()
-
+for reader in readers:
+    reader.start()
 time.sleep(60*5)
 # while True:
 #     end = raw_input(
@@ -36,4 +41,5 @@ time.sleep(60*5)
 #         break
 
 print ("{} recordings made".format(rssi.Rssi.commits))
-reader1.join()
+for reader in readers:
+    reader.join()
