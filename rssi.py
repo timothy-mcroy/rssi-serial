@@ -55,7 +55,7 @@ class Rssi(object):
 
         self.db_connection.close()
 
-import read_rssi
+import protocol_init
 import threading 
 class Serial_Reader(threading.Thread):
     """
@@ -96,7 +96,7 @@ class Serial_Reader(threading.Thread):
         #  This is also how Rssi knows that it is finished recording.
         with Rssi(self.name) as device_record:
             # Initialize the protocol to begin transmitting data
-            read_rssi.start_reading(self.serial_instance)
+            protocol_init.start_reading(self.serial_instance)
             print("Collecting data on {}".format(self.name))
             # Collect rssi information until self.join() is called.
             while not self._stopevent.isSet():
