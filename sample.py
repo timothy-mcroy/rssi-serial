@@ -22,7 +22,7 @@ def reading_matcher(reading):
     return result
 
 readers = [rssi.Serial_Reader(connection, reading_matcher, address) 
-            for connection, address in zip(serial_connections, addresses]    
+            for connection, address in zip(serial_connections, addresses)]    
 
 while raw_input("Enter s to start recording data\n") != "s":
     continue
