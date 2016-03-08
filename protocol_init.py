@@ -2,9 +2,9 @@ import serial
 import time
 
 def handleArg(ser, expected_prompt, arg, next_prompt, next_arg, parse_data):
+    print("Handling prompt {}".format(expected_prompt))
     while True:
         cur_line = ser.readline()
-        print("Expected {}, Received:".format(expected_prompt,cur_line))
         ser.write(arg)
         # If the data matches our input parser,
         #     the protocol is finished. 

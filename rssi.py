@@ -66,7 +66,12 @@ class Serial_Reader(threading.Thread):
         serial_instance = serial.Serial('/dev/ttyACM0', 115200, timeout=2)
         def parse_data(data):
             return data_as_parsed_tuple(data)
-        reader = Serial_Reader(serial_instance, parse_data)
+        protocol = [ ('', b'\n\n\n\n'),
+                     ('In: OPMOD:', b'RX0'),
+                     ('In: SAM_INTV:', b'100'),
+                     ('In: CHNUM:', b'C11')]
+
+        reader = Serial_Reader(serial_instance, parse_data, protocol)
         reader.start()
         # Record for 5 seconds
         time.sleep(5)  

@@ -45,5 +45,8 @@ time.sleep(60*5)
 #         break
 
 print ("{} recordings made".format(rssi.Rssi.commits))
+est_skipped= sum(reader.times_data_failed_to_match for reader in readers)
+print ('{} transmissions skipped'.format(est_skipped))
+        
 for reader in readers:
     reader.join()
