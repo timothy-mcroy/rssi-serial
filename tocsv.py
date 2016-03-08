@@ -8,7 +8,7 @@ import csv
 import sqlite3
 def toCSV(filename):
     with open(filename, 'wb') as f:
-        conn = sqlite3.connect('signals.db')
+        conn = sqlite3.connect('database.db')
         cur = conn.cursor()
         data = cur.execute("SELECT * FROM recording")
         headings = [desc[0] for desc in cur.description]
