@@ -55,7 +55,6 @@ class Signal_Repository(object):
 
         self.db_connection.close()
 
-import protocol_init
 import threading 
 class Serial_Reader(threading.Thread):
     """
@@ -102,7 +101,7 @@ class Serial_Reader(threading.Thread):
         #  This is also how Signal_Repository knows that it is finished recording.
         with Signal_Repository(self.name) as device_record:
             # Initialize the protocol to begin transmitting data
-            protocol_init.start_reading(self.serial_instance, 
+            Protocol.start_reading(self.serial_instance, 
                     self.protocol, self.parse_data)
             print("Collecting data on {}".format(self.name))
             # Collect rssi information until self.join() is called.
@@ -126,4 +125,53 @@ class Serial_Reader(threading.Thread):
         threading.Thread.join(self, timeout)
 
 
+class Protocol:
+    
+    @staticmethod
+    def start_reading(serial_connection, protocol_args, parse_data):
+        '''
+        Performs setup protocol for reading RSSI data.
+
+        WARNING:
+            Runs in infinite loop if device is not in state to accept 
+        the protocol.
+        '''
+        ser = serial_connection
+        # Having the list end at None, None lets us know that it is finished
+        protocol_args.append((None,None))
+        
+        for i,(expected_prompt, arg) in enumerate(protocol_args):
+            if expected_prompt is None:
+                return
+
+            next_prompt, next_arg = protocol_args[i+1]
+            Protocol.handleArg(ser, expected_prompt, arg, next_prompt, parse_data)
+
+
+    @staticmethod
+    def handleArg(ser, expected_prompt, arg, next_prompt, parse_data):
+        '''
+        Repeatedly inputs the argument with respect to a prompt.
+        When the next_prompt is detected, this function will quit.
+        
+        Parse_data is used to detect whether the serial connection
+        is transmitting the expected output.  If that is the case and
+        the next_prompt is None, we assume that this is the last argument
+        of the protocol. 
+        '''
+        print("Handling prompt {}".format(expected_prompt))
+        while True:
+            cur_line = ser.readline()
+            ser.write(arg)
+            # If the data matches our input parser,
+            #     the protocol is finished. 
+            if parse_data(cur_line) is not None and next_prompt is None:
+                return
+            # If the next prompt has been reached, the current prompt was 
+            #     handled
+            elif next_prompt is not None and next_prompt in cur_line: 
+                return
+
+
+            
 
