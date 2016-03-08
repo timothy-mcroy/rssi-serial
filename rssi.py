@@ -3,13 +3,13 @@ import datetime
 import serial
 
 
-class Rssi(object):
+class Signal_Repository(object):
     '''
-    Repository for Rssi information.
+    Repository for Signal_Repository information.
     
     Information is stored in 'signals.db' - a sqlite database.
     
-    Rssi.commits represents the number of records written
+    Signal_Repository.commits represents the number of records written
         during this connection.  
         It is NOT the total number of records. 
 
@@ -42,7 +42,7 @@ class Rssi(object):
                 '''INSERT INTO recording VALUES (?, ?, ?, ?);'''
                 ,args)
         self.db_connection.commit()
-        Rssi.commits+=1
+        Signal_Repository.commits+=1
     def __exit__(self, exc_type, exc_value, traceback):
         '''
         Closes the database connection after recording an end-connection entry.
@@ -99,8 +99,8 @@ class Serial_Reader(threading.Thread):
         This method should not be directly called.
         '''
         # Using `with` is important to ensure automatic disposal of resources
-        #  This is also how Rssi knows that it is finished recording.
-        with Rssi(self.name) as device_record:
+        #  This is also how Signal_Repository knows that it is finished recording.
+        with Signal_Repository(self.name) as device_record:
             # Initialize the protocol to begin transmitting data
             protocol_init.start_reading(self.serial_instance, 
                     self.protocol, self.parse_data)

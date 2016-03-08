@@ -33,7 +33,7 @@ while raw_input("Enter s to start recording data\n") != "s":
 
 for reader in readers:
     reader.start()
-time.sleep(60*5)
+time.sleep(5)
 # while True:
 #     end = raw_input(
 # '''Enter q to stop\n
@@ -44,7 +44,7 @@ time.sleep(60*5)
 #         print("Quitting after {} recordings".format(rssi.Rssi.commits))
 #         break
 
-print ("{} recordings made".format(rssi.Rssi.commits))
+print ("{} recordings made".format(rssi.Signal_Repository.commits))
 est_skipped= sum(reader.times_data_failed_to_match for reader in readers)
 print ('{} transmissions skipped'.format(est_skipped))
         
