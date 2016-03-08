@@ -31,9 +31,6 @@ def start_reading(serial_connection, protocol_args, parse_data):
             return
 
         next_prompt, next_arg = protocol_args[i+1]
-        if parse_data("Channel: 11 ; RSSI is: -83") is None:
-            print("Parser isn't working")
-
         handleArg(ser, expected_prompt, arg, next_prompt, next_arg, parse_data)
 
         
