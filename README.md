@@ -14,8 +14,3 @@ Run
 python sample.py
 ```
 Enter `s` to start recording.  
-
-`q` will stop recording
-
-`c` will display the current number of recordings. 
-
