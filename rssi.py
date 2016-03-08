@@ -126,6 +126,9 @@ class Serial_Reader(threading.Thread):
 
 
 class Protocol:
+    '''
+    Methods related to initializing protocols.
+    '''
     
     @staticmethod
     def start_reading(serial_connection, protocol_args, parse_data):
