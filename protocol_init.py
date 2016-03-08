@@ -3,7 +3,6 @@ import time
 
 def handleArg(ser, expected_prompt, arg, next_prompt, next_arg, parse_data):
     while True:
-        debug =raw_input()
         cur_line = ser.readline()
         print("Expected {}, Received:".format(expected_prompt,cur_line))
         ser.write(arg)
