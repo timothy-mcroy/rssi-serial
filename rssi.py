@@ -21,7 +21,7 @@ class Signal_Repository(object):
         '''
         self.device_id = device_id
         # We want to know that a connection happened
-        self.db_connection = sqlite3.connect('database.db')
+        self.db_connection = sqlite3.connect('signals.db')
         self.db_connection.execute(
                 'CREATE TABLE IF NOT EXISTS connections (date text, device_id text, start_connect boolean);')
         args = (datetime.datetime.utcnow(), self.device_id, True,)
