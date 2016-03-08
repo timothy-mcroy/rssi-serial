@@ -14,14 +14,18 @@ def reading_matcher(reading):
 
     return (int, int)
     '''
-    pattern = re.compile(r'Channel: (\d+) ; RSSI is: -(\d+)')
-    match = pattern.match(reading)
-    if match is None:
-        return match
-    result = tuple(map(int,match.groups()))
+    pattern = re.compile(r'Channel: (\d+) ; RSSI is: (.?\d+)')
+    match = pattern.findall(reading)
+    if len(match) == 0:
+        return None
+    result = tuple(map(int,match[0]))
     return result
 
-readers = [rssi.Serial_Reader(connection, reading_matcher, address) 
+protocol = [('', b'\n\n\n\n'),
+        ('In: OPMOD:', b'RX0'),
+        ('In: SAM_INTV:', b'100'),
+        ('In: CHNUM:', b'C11')]
+readers = [rssi.Serial_Reader(connection, reading_matcher, protocol, address) 
             for connection, address in zip(serial_connections, addresses)]    
 
 while raw_input("Enter s to start recording data\n") != "s":

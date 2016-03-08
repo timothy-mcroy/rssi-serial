@@ -1,47 +1,40 @@
 import serial
 import time
 
-def start_reading(serial_connection):
-    '''Performs setup protocol for reading RSSI data.
+def handleArg(ser, expected_prompt, arg, next_prompt, next_arg, parse_data):
+    while True:
+        debug =raw_input()
+        cur_line = ser.readline()
+        print("Expected {}, Received:".format(expected_prompt,cur_line))
+        ser.write(arg)
+        # If the data matches our input parser,
+        #     the protocol is finished. 
+        if parse_data(cur_line) is not None and next_prompt is None:
+            return
+        # If the next prompt has been reached, we should send it the data
+        elif next_prompt is not None and next_prompt in cur_line: 
+            return
+        else:
+            continue
+
+def start_reading(serial_connection, protocol_args, parse_data):
+    '''
+    Performs setup protocol for reading RSSI data.
     Returns early without an exception if 
         the device was already transmitting.
     '''
     ser = serial_connection
-    print("Checking whether device is active.")
-    while True:
-        x = ser.readline()
-        repr(x)
-        print(x)
-        if "Channel" in x:
-            print "Sensortag was already transmitting!"
-            print "Beginning recording under previous settings"
+    protocol_args.append((None,None))
+    
+    for i,(expected_prompt, arg) in enumerate(protocol_args):
+        if expected_prompt is None:
             return
-        if x != '':
-            ser.write(b'M00')
-            break
 
-    print("Setting OP MODE... ")
-    while True:
-        x = ser.readline()
-        print(x)
-        ser.write(b'M00')
-        if "OPMOD" in x: 
-            ser.write(b'100')
-            break
+        next_prompt, next_arg = protocol_args[i+1]
+        if parse_data("Channel: 11 ; RSSI is: -83") is None:
+            print("Parser isn't working")
 
-    print("Setting transmission rate... ")
-    while True:
-        x = ser.readline()
-        print(x)
-        ser.write(b'100')
-        if 'SMPSET' in x:
-            ser.write(b'C11')
-            break
+        handleArg(ser, expected_prompt, arg, next_prompt, next_arg, parse_data)
 
-    print("Setting Channel")
-    count =0
-    x = ser.readline()
-    while "Channel" not in x: 
-        print(x)
-        x = ser.readline() 
-        ser.write(b'C11')
+        
+

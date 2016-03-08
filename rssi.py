@@ -74,7 +74,7 @@ class Serial_Reader(threading.Thread):
         reader.join()
     ```
     """
-    def __init__(self, serial_instance, parse_data, address = None):
+    def __init__(self, serial_instance, parse_data, protocol, address = None):
         '''
         parse_data should parse the data read by the serial_instance
         and return (channel_num, rssi)
@@ -86,7 +86,8 @@ class Serial_Reader(threading.Thread):
         else:
             threading.Thread.__init__(self, name=str(address))
         self.serial_instance = serial_instance
-        self.times_data_failed_to_match= 0
+        self.times_data_failed_to_match = 0
+        self.protocol = protocol
         
     def run(self):
         '''
@@ -96,7 +97,8 @@ class Serial_Reader(threading.Thread):
         #  This is also how Rssi knows that it is finished recording.
         with Rssi(self.name) as device_record:
             # Initialize the protocol to begin transmitting data
-            protocol_init.start_reading(self.serial_instance)
+            protocol_init.start_reading(self.serial_instance, 
+                    self.protocol, self.parse_data)
             print("Collecting data on {}".format(self.name))
             # Collect rssi information until self.join() is called.
             while not self._stopevent.isSet():
