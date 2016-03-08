@@ -21,11 +21,14 @@ def reading_matcher(reading):
     result = tuple(map(int,match[0]))
     return result
 
-protocol = [('', b'\n\n\n\n'),
-        ('In: OPMOD:', b'RX0'),
-        ('In: SAM_INTV:', b'100'),
-        ('In: CHNUM:', b'C11')]
-readers = [rssi.Serial_Reader(connection, reading_matcher, protocol, address) 
+protocol = [ '', 'In: OPMOD:', 'In: SAM_INTV:', 'In: CHNUM:']
+args = []
+for arg_num, prompt in enumerate(protocol):
+    arg = raw_input(" {} :: {} : ".format(arg_num, prompt))
+    args.append(bytes(arg))
+
+protocol_args = zip(protocol, args)
+readers = [rssi.Serial_Reader(connection, reading_matcher, protocol_args, address) 
             for connection, address in zip(serial_connections, addresses)]    
 
 while raw_input("Enter s to start recording data\n") != "s":
